@@ -1,0 +1,45 @@
+﻿@page "/class-list"
+@inject TeacherKnowledgeHub.Services.ClassService ClassService
+@inject NavigationManager Navigation
+
+<h3>Lista klas</h3>
+
+<input placeholder="Nazwa klasy" @bind="newClassName" />
+<button class="btn btn-primary" @onclick="AddClass">Dodaj klasę</button>
+
+<ul>
+    @foreach (var classModel in classes)
+    {
+        <li>
+            <a @onclick="() => NavigateToClass(classModel.Id)">
+                @classModel.Name
+            </a>
+        </li>
+    }
+</ul>
+
+@code {
+    private List<TeacherKnowledgeHub.Models.ClassModel> classes = new();
+    private string newClassName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        classes = await ClassService.GetAllAsync();
+    }
+
+    private async Task AddClass()
+    {
+        if (!string.IsNullOrWhiteSpace(newClassName))
+        {
+            var newClass = new TeacherKnowledgeHub.Models.ClassModel { Name = newClassName };
+            await ClassService.AddAsync(newClass);
+            classes = await ClassService.GetAllAsync();
+            newClassName = string.Empty;
+        }
+    }
+
+    private void NavigateToClass(int id)
+    {
+        Navigation.NavigateTo($"/class/{id}");
+    }
+}
